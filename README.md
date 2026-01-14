@@ -1,20 +1,20 @@
 # Booker API Test Report
-In this project I have performed API automation testing on [Restfull Booker API](https://restful-booker.herokuapp.com). To perform the tests I used Postman API Testing Tool.
+In this project I have performed API automation testing on [Restful Booker API](https://restful-booker.herokuapp.com). To perform the tests I used Postman API Testing Tool.
 
 ## How to run this project
 - Clone this project
 - Open with Postman / Command Shell
 - Run Command:  
 ```console 
-newman run Shop_API_Manan_Ahmed_Broti.postman_collection.json -e Shop_API_Manan_Ahmed_Broti.postman_environment.json
+newman run Restful_Booker_API.postman_collection.json -e Restful_Booker_API.postman_environment.json
 ```
 - Run Command for Report: 
 ```console 
-newman run Shop_API_Manan_Ahmed_Broti.postman_collection.json -e Shop_API_Manan_Ahmed_Broti.postman_environment.json -r cli,htmlextra
+newman run Restful_Booker_API.postman_collection.json -e Restful_Booker_API.postman_environment.json -r cli,htmlextra
 ```
 - Run Command for Report With Iteration: 
 ```console 
-newman run Shop_API_Manan_Ahmed_Broti.postman_collection.json -e Shop_API_Manan_Ahmed_Broti.postman_environment.json -n "number of iteration" -r cli,htmlextra
+newman run Restful_Booker_API.postman_collection.json -e Restful_Booker_API.postman_environment.json -n "number of iteration" -r cli,htmlextra
 ```
 
 ## Technology used:
