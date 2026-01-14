@@ -1,0 +1,448 @@
+{
+	"info": {
+		"_postman_id": "48bee2a6-e55c-4386-8bf7-dbd62fd7fb68",
+		"name": "Restful_Booker_API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "23708981"
+	},
+	"item": [
+		{
+			"name": "base_url",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}",
+					"host": [
+						"{{base_url}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Ping - HealthCheck",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/ping",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"ping"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Auth – Create Token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = pm.response.json()\r",
+							"pm.environment.set(\"token\", jsonData.token)"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"admin\",\r\n    \"password\": \"password123\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/auth",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"auth"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "All Bookings",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/booking/",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"booking",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Booking – Create Booking",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = pm.response.json()\r",
+							"pm.environment.set(\"booking_id\", jsonData.bookingid)\r",
+							"\r",
+							"pm.environment.set(\"firstname\", jsonData.booking.firstname)\r",
+							"pm.environment.set(\"lastname\", jsonData.booking.lastname)\r",
+							"pm.environment.set(\"totalprice\", jsonData.booking.totalprice)\r",
+							"pm.environment.set(\"depositpaid\", jsonData.booking.depositpaid)\r",
+							"pm.environment.set(\"additionalneeds\", jsonData.booking.additionalneeds)\r",
+							"pm.environment.set(\"checkout\", jsonData.booking.bookingdates.checkout)\r",
+							"pm.environment.set(\"checkin\", jsonData.booking.bookingdates.checkin)\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var firstname = pm.variables.replaceIn('{{$randomFirstName}}')\r",
+							"console.log(firstname)\r",
+							"pm.environment.set(\"firstname\", firstname)\r",
+							"\r",
+							"var lastname = pm.variables.replaceIn('{{$randomLastName}}')\r",
+							"console.log(lastname)\r",
+							"pm.environment.set(\"lastname\", lastname)"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Cookie",
+						"value": "token={{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\t\"firstname\" : \"{{firstname}}\",\r\n\t\"lastname\" : \"{{lastname}}\",\r\n\t\"totalprice\" : 111,\r\n\t\"depositpaid\" : true,\r\n\t\"bookingdates\" : {\r\n    \t\"checkin\" : \"2018-01-01\",\r\n    \t\"checkout\" : \"2019-01-01\"\r\n\t},\r\n\t\"additionalneeds\" : \"Breakfast\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/booking",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"booking"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Booking – Get Booking",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"var jsonData = pm.response.json()\r",
+							"\r",
+							"pm.test(\"Validate Name\", function () {\r",
+							"    var expectedName = pm.environment.get(\"firstname\") + ' ' + pm.environment.get(\"lastname\");\r",
+							"    var actualName = jsonData.firstname + ' ' + jsonData.lastname;\r",
+							"    \r",
+							"    pm.expect(actualName).to.equal(expectedName);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Check Total Price\", function () {\r",
+							"    pm.expect(jsonData.totalprice).to.equal(pm.environment.get(\"totalprice\"));\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Check Booking Dates\", function () {\r",
+							"    var expectedDates = pm.environment.get(\"checkin\") + '-' + pm.environment.get(\"checkout\");\r",
+							"    var actualDates = jsonData.bookingdates.checkin + '-' + jsonData.bookingdates.checkout;\r",
+							"    \r",
+							"    pm.expect(actualDates).to.equal(expectedDates);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/booking/:id",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"booking",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{booking_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Booking – Update Booking",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = pm.response.json()\r",
+							"pm.test(\"Validate Name\", function () {\r",
+							"    var expectedName = pm.environment.get(\"firstname\") + ' ' + pm.environment.get(\"lastname\");\r",
+							"    var actualName = jsonData.firstname + ' ' + jsonData.lastname;\r",
+							"    \r",
+							"    pm.expect(actualName).to.equal(expectedName);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Check Booking Dates\", function () {\r",
+							"    var expectedDates = pm.environment.get(\"checkin\") + '-' + pm.environment.get(\"checkout\");\r",
+							"    var actualDates = jsonData.bookingdates.checkin + '-' + jsonData.bookingdates.checkout;\r",
+							"    \r",
+							"    pm.expect(actualDates).to.equal(expectedDates);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var firstname = pm.variables.replaceIn('{{$randomFirstName}}')\r",
+							"console.log(firstname)\r",
+							"pm.environment.set(\"firstname\", firstname)\r",
+							"\r",
+							"var lastname = pm.variables.replaceIn('{{$randomLastName}}')\r",
+							"console.log(lastname)\r",
+							"pm.environment.set(\"lastname\", lastname)\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Cookie",
+						"value": "token={{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\t\"firstname\" : \"{{firstname}}\",\r\n\t\"lastname\" : \"{{lastname}}\",\r\n\t\"totalprice\" : 234,\r\n\t\"depositpaid\" : false,\r\n\t\"bookingdates\" : {\r\n    \t\"checkin\" : \"{{checkin}}\",\r\n    \t\"checkout\" : \"{{checkout}}\"\r\n\t},\r\n\t\"additionalneeds\" : \"lunch\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/booking/:id",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"booking",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{booking_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Booking – Create Booking Copy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = pm.response.json()\r",
+							"pm.environment.set(\"booking_id\", jsonData.bookingid)\r",
+							"\r",
+							"pm.environment.set(\"firstname\", jsonData.booking.firstname)\r",
+							"pm.environment.set(\"lastname\", jsonData.booking.lastname)\r",
+							"pm.environment.set(\"totalprice\", jsonData.booking.totalprice)\r",
+							"pm.environment.set(\"depositpaid\", jsonData.booking.depositpaid)\r",
+							"pm.environment.set(\"additionalneeds\", jsonData.booking.additionalneeds)\r",
+							"pm.environment.set(\"checkout\", jsonData.booking.bookingdates.checkout)\r",
+							"pm.environment.set(\"checkin\", jsonData.booking.bookingdates.checkin)\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\t\"firstname\" : \"Jhon\",\r\n\t\"lastname\" : \"Holystone\",\r\n\t\"totalprice\" : 111,\r\n\t\"depositpaid\" : true,\r\n\t\"bookingdates\" : {\r\n    \t\"checkin\" : \"2018-01-01\",\r\n    \t\"checkout\" : \"2019-01-01\"\r\n\t},\r\n\t\"additionalneeds\" : \"Breakfast\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/booking",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"booking"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Booking - Partial Update Booking",
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Cookie",
+						"value": "token={{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"firstname\" : \"James\",\r\n    \"lastname\" : \"Brown\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/booking/:id",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"booking",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{booking_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Booking - DeleteBooking",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Cookie",
+						"value": "token={{token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/booking/:id",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"booking",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{booking_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
